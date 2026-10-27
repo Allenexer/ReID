@@ -11,7 +11,7 @@
 - M1 数据与评测就绪：进行中（目录与职责已定，manifest/指标由 A 自行设计；等待数据集与权重）
 - 基线：TransReID（主）、CLIP-ReID（对比），已固定 commit 并提供兼容补丁
 - 环境：搭建步骤与版本见 `docs/SETUP.md`（torch 2.5.x + torchvision 0.20.1、
-  timm/yacs）；已在 B 本机验证，其余成员各自在本机搭建
+  timm/yacs）；已在一台机器上验证，各成员各自在本机搭建
 
 ## 快速开始
 
@@ -53,7 +53,7 @@ docs/            项目文档
 | 成员 | 工作流 | 主要交付 |
 |---|---|---|
 | A | 数据与评测 | 数据集、manifest、指标对拍 |
-| B | TransReID 基线 | 环境、权重、Market1501/Move 结果 |
+| B | TransReID 基线 | 权重、Market1501/Move 结果 |
 | C | CLIP-ReID + 加分 | 第二基线、CCVID、遮挡/换衣实验 |
 | D | 集成与报告 | 实验入口、复现、图表、报告 |
 

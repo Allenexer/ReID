@@ -21,7 +21,7 @@
 
 | 任务 | 建议 owner | 状态 | 验收标准 |
 |---|---|---|---|
-| 环境与依赖锁定 | B | 进行中 | `.venv` 已建、CUDA 可用；`requirements.lock` 待生成 |
+| 环境与依赖锁定 | 待定 | 进行中 | `.venv` 已建、CUDA 可用；`requirements.lock` 待生成 |
 | Market1501 下载、校验、manifest | A | 待开始 | 3368 query / 750 query ID；`check_dataset` 通过；行序与上游 glob 一致 |
 | mAP/CMC 实现与上游对拍 | A | 待开始 | 单测通过；同一 distmat 与上游误差 < 0.1% |
 | 跨基线统一评测路径 | A | 待开始 | B/C 数字出自同一套评测（保存 distmat 重算，或记录日志对拍） |
