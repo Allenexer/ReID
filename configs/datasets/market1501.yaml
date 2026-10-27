@@ -1,0 +1,14 @@
+# Market1501 dataset card. Paths are relative to the repo root.
+name: market1501
+root: data/raw
+manifest: data/processed/manifests/market1501.json
+protocol: market1501
+expected:
+  query_images: 3368
+  query_ids: 750
+  train_images: 12936
+  train_ids: 751
+notes: |
+  Official split. Place the dataset at data/raw/market1501/ with
+  bounding_box_train/, query/ and bounding_box_test/.
+  The parser also accepts data/raw/Market-1501-v15.09.15/.

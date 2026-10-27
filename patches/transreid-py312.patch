@@ -1,0 +1,20 @@
+diff --git a/model/backbones/vit_pytorch.py b/model/backbones/vit_pytorch.py
+index 9ebeb3d..9dbf200 100644
+--- a/model/backbones/vit_pytorch.py
++++ b/model/backbones/vit_pytorch.py
+@@ -27,13 +27,13 @@ from itertools import repeat
+ import torch
+ import torch.nn as nn
+ import torch.nn.functional as F
+-from torch._six import container_abcs
++from collections.abc import Iterable
+
+
+ # From PyTorch internals
+ def _ntuple(n):
+     def parse(x):
+-        if isinstance(x, container_abcs.Iterable):
++        if isinstance(x, Iterable):
+             return x
+         return tuple(repeat(x, n))
+     return parse

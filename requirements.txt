@@ -1,0 +1,6 @@
+# Core dev dependencies.
+# PyTorch is installed separately because CPU/CUDA variants differ; see docs/SETUP.md.
+numpy>=1.26
+pytest>=8.0
+ruff>=0.6
+PyYAML>=6.0

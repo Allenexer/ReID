@@ -1,0 +1,46 @@
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# Third-party baselines (re-clone via scripts/setup_third_party.sh)
+third_party/*
+!third_party/README.md
+
+# Data & large artifacts (keep the README)
+data/*
+!data/README.md
+outputs/*
+!outputs/.gitkeep
+checkpoints/
+wandb/
+lightning_logs/
+mlruns/
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.h5
+*.safetensors
+
+# Logs
+*.log
+
+# Temporary
+*.tmp
+*.bak
