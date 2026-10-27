@@ -12,9 +12,5 @@
 
 ## 重建步骤
 
-```bash
-# Market1501：下载解压到 data/raw/ 后
-py -3 -m scripts.check_dataset --config configs/datasets/market1501.yaml
-```
-
-详细说明见 `docs/DATA.md`。
+Market1501 下载解压到 `data/raw/` 后，运行 A 提供的 manifest 生成命令；该命令由 A
+在实现 `scripts/check_dataset.py` 时确定，并补充到此处。详细说明见 `docs/DATA.md`。

@@ -21,7 +21,7 @@
 - 统一目录：所有人解压到 `data/raw/<dataset>/`，目录层级按本文件。
 - 一致性校验：A 在 `data/README.md` 登记来源、日期、大小与 SHA256；成员下载后
   先核对哈希，再运行数据校验。
-- manifest 不入库：其中 `root` 为本机绝对路径，换机器后需用本地数据重新生成。
+- manifest 不入库：通常包含本机路径信息，换机器后需用本地数据重新生成。
   如确需共享，放组内网盘，不放入 git。
 
 ## 2. Market1501
@@ -37,7 +37,7 @@
 kaggle datasets download -d pengcw1/market-1501 -p data/raw --unzip
 ```
 
-把解压后的目录整理成下面任一形式（解析器两种都认）：
+建议把解压后的目录整理成下面任一形式：
 
 ```text
 data/raw/market1501/
@@ -55,14 +55,9 @@ data/raw/Market-1501-v15.09.15/
   bounding_box_test/
 ```
 
-生成并校验 manifest（A 实现 `scripts/check_dataset.py` 后可用）：
-
-```bash
-py -3 -m scripts.check_dataset --config configs/datasets/market1501.yaml
-```
-
-当前该脚本为接口骨架，运行会提示 `TODO(A)`。预期输出：query 3368 张 / 750 ID，
-train 12936 张 / 751 ID。若数量不符，先检查目录层级和文件名，不要继续跑实验。
+manifest 的字段与生成命令由 A 设计；`scripts/check_dataset.py` 目前只有职责占位，
+A 实现后在此补充实际命令。预期规模：query 3368 张 / 750 ID，train 12936 张 /
+751 ID。若数量不符，先检查目录层级和文件名，不要继续跑实验。
 
 评测协议：
 

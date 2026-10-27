@@ -72,7 +72,7 @@
 - **日期**：2026-10-27
 - **状态**：提议（待 A 确认；接口细节由 A 实现时定稿）
 - **背景**：三个数据集格式不同，上游代码只认 Market1501 目录；需要让数据、评测、基线解耦。
-- **决策**：`src/reid/manifest.py` 定义 `(path, pid, camid)` 的 query/gallery/train 清单；Market1501 直接解析官方目录，Move/CCVID 后续转换为同样的 manifest 或 Market1501 兼容目录。
+- **决策**：manifest 作为数据与评测之间的清单接口；具体字段、文件格式与生成方式由 A 设计，组内评审后写入 `docs/DATA.md` 并冻结。Market1501 直接解析官方目录，Move/CCVID 后续转换为同样的 manifest 或 Market1501 兼容目录。
 - **备选方案**：每个数据集改一份上游 dataloader；手工维护 txt 列表。
 - **影响**：manifest 成为数据与评测的冻结接口；上游代码尽量不改，必要时用 `patches/`。
 - **关联**：D009、D010

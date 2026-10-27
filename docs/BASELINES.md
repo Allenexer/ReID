@@ -72,20 +72,10 @@ python test.py \
 yacs 的，表示字符串 `none`。跑通后再把 batch 加到 16。
 
 上游把日志写到 `OUTPUT_DIR/test_log.txt`（注意不是 `test.log`），里面会有
-`mAP:`、`Rank-1/5/10`。在仓库根目录转成 `metrics.json`：
+`mAP:`、`Rank-1/5/10`。这是唯一允许写进报告的指标来源，不要手抄日志里的数字。
 
-```bash
-python -m scripts.log_to_metrics \
-  --log outputs/20261027-transreid-market/test_log.txt \
-  --output outputs/20261027-transreid-market/metrics.json \
-  --run-id 20261027-transreid-market \
-  --baseline transreid \
-  --dataset market1501
-```
-
-这是唯一允许写进报告的指标来源，不要手抄日志里的数字。该脚本当前为接口骨架
-（`TODO(B)`），B 实现后按上述命令使用；实现前保留原始 `test_log.txt`，不要
-把日志里的数字手工填进报告。
+`scripts/log_to_metrics.py` 的命令行由 B 设计；B 实现后在此补充实际命令。实现前
+保留原始 `test_log.txt`，不要把日志里的数字手工填进报告。
 
 ## 4. CLIP-ReID
 
@@ -147,4 +137,4 @@ outputs/<run-id>/
   git.txt         本项目 commit + 上游 commit
 ```
 
-`metrics.json` 字段见 `scripts/evaluate.py`；报告只引用它。
+`metrics.json` 的字段由 A 在评测实现时定稿并写入文档；报告只引用它。
