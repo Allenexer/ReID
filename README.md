@@ -64,6 +64,5 @@ docs/            项目文档
 - [数据说明](docs/DATA.md)
 - [基线部署](docs/BASELINES.md)
 - [环境搭建](docs/SETUP.md)
-- [决策日志](docs/DECISIONS.md)
 - [路线图](docs/ROADMAP.md)
 - [实验台账](docs/EXPERIMENTS.md)

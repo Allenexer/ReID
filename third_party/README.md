@@ -19,5 +19,4 @@ bash scripts/setup_third_party.sh
 
 - 不直接修改本目录下的文件；需要改动时写 `patches/*.patch`，由脚本应用。
 - 不把上游代码、权重、日志提交进本项目。
-- 升级上游版本时，更新 `scripts/setup_third_party.sh`、本文件和 `docs/BASELINES.md`，
-  并在 `docs/DECISIONS.md` 记录原因。
+- 升级上游版本时，更新 `scripts/setup_third_party.sh`、本文件和 `docs/BASELINES.md`。

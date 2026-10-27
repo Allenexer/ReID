@@ -18,7 +18,7 @@
 git diff -- <path> > ../../patches/<repo>-<purpose>.patch
 
 # 3. 把补丁加入 scripts/setup_third_party.sh 的 apply_patch 调用
-# 4. 在 docs/BASELINES.md 和 docs/DECISIONS.md 记录原因
+# 4. 在 docs/BASELINES.md 记录原因
 ```
 
 补丁必须能用 `git apply` 干净应用；不要包含无关的格式化改动。

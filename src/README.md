@@ -6,8 +6,8 @@
 - `metrics.py` — mAP/CMC 评测（A）
 - `logparse.py` — 上游日志解析（B）
 
-接口、数据结构、命令行参数与实现均由对应负责人设计；跨成员使用时由双方协商，
-并在 `docs/DECISIONS.md` 记录。规划中：`adapters/`（Move/CCVID → manifest）、
+接口、数据结构、命令行参数与实现均由对应负责人设计；跨成员使用时由双方协商
+并同步。规划中：`adapters/`（Move/CCVID → manifest）、
 `features.py`（特征提取/距离矩阵）。
 
 规则：

@@ -122,7 +122,7 @@ query/gallery，直接套用会失败。候选方案（按优先级）：
    让上游原样读取；
 3. 修改上游 `make_dataloader`，跳过训练集构造（补丁放 `patches/`）。
 
-方案选定后更新本节和 `DECISIONS.md`。在 Move 数据到手前，先用 Market1501 跑通全链路。
+方案选定后更新本节。在 Move 数据到手前，先用 Market1501 跑通全链路。
 
 ## 7. 输出契约
 
