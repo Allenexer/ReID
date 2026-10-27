@@ -28,7 +28,7 @@
 | 数据台账 `data/README.md` | A | 待开始 | 来源、大小、校验和、下载步骤齐全 |
 | TransReID Market1501 基线 | B | 待开始 | 有 `metrics.json`；与上游报告值差 ≤1pp |
 | CLIP-ReID Market1501 基线 | C | 待开始 | 有 `metrics.json`；与上游报告值差 ≤1pp |
-| 统一实验入口 `scripts/run_baseline.py` | D | 待开始 | 一条命令生成 run 目录、日志、`metrics.json` |
+| 统一实验入口 | D | 待开始 | 一条命令生成 run 目录、日志、`metrics.json`；文件名与接口由 D 设计 |
 
 ## 后续关键路径
 
