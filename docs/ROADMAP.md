@@ -17,13 +17,13 @@
 
 ## 当前迭代（W1：2026-10-27 → 2026-11-02）
 
-**目标**：数据接口与指标实现冻结；Market1501 跑通至少一个基线。
+**目标**：接口已定义；A 开始实现数据与评测，B 跑通至少一个基线。
 
 | 任务 | 建议 owner | 状态 | 验收标准 |
 |---|---|---|---|
-| 环境与依赖锁定 | B | 进行中 | `.venv` + `pip freeze`；torch CUDA 可用 |
+| 环境与依赖锁定 | B | 进行中 | `.venv` 已建、CUDA 可用；`requirements.lock` 待生成 |
 | Market1501 下载、校验、manifest | A | 待开始 | 3368 query / 750 query ID；`check_dataset` 通过；行序与上游 glob 一致 |
-| mAP/CMC 实现与上游对拍 | A | 进行中 | 单测通过；同一 distmat 与上游误差 < 0.1% |
+| mAP/CMC 实现与上游对拍 | A | 待开始 | 单测通过；同一 distmat 与上游误差 < 0.1% |
 | 跨基线统一评测路径 | A | 待开始 | B/C 数字出自同一套评测（保存 distmat 重算，或记录日志对拍） |
 | 数据台账 `data/README.md` | A | 待开始 | 来源、大小、校验和、下载步骤齐全 |
 | TransReID Market1501 基线 | B | 待开始 | 有 `metrics.json`；与上游报告值差 ≤1pp |

@@ -1,30 +1,22 @@
 #!/usr/bin/env python
 """Build and validate a dataset manifest.
 
-Examples (from the repo root)::
+This file is the shared CLI entry point. The dataset parser and the
+validation checks are TODO for member A; see ``src/reid/manifest.py``.
+
+Intended usage (from the repo root)::
 
     python -m scripts.check_dataset --config configs/datasets/market1501.yaml
-    python scripts/check_dataset.py --dataset market1501 --root data/raw
 
-The manifest is written to ``data/processed/manifests/<dataset>.json`` and
-is the input for ``scripts/evaluate.py`` and the baseline adapters.
+The manifest should be written to
+``data/processed/manifests/<dataset>.json`` and is the input for
+``scripts/evaluate.py`` and the baseline adapters.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
-import sys
 from pathlib import Path
-
-REPO_ROOT = Path(__file__).resolve().parents[1]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from src.reid.manifest import (  # noqa: E402
-    build_market1501_manifest,
-    verify_manifest,
-)
 
 try:
     import yaml
@@ -60,32 +52,14 @@ def main() -> int:
     out = args.out or Path(
         cfg.get("manifest", f"data/processed/manifests/{dataset}.json")
     )
-    expected = cfg.get("expected", {}) or {}
 
-    if dataset != "market1501":
-        raise SystemExit(f"unsupported dataset: {dataset}")
-
-    manifest = build_market1501_manifest(root, name=dataset)
-    stats = manifest.stats()
-    print(json.dumps(stats, ensure_ascii=False, indent=2))
-
-    checks = [
-        ("query_images", stats["query"]["images"]),
-        ("query_ids", stats["query"]["pids"]),
-        ("train_images", stats["train"]["images"]),
-        ("train_ids", stats["train"]["pids"]),
-    ]
-    for key, actual in checks:
-        if key in expected and actual != expected[key]:
-            print(f"WARNING: {key} = {actual}, expected {expected[key]}")
-
-    issues = verify_manifest(manifest)
-    for issue in issues:
-        print(f"WARNING: {issue}")
-
-    manifest.save(out)
-    print(f"manifest written to {out}")
-    return 0
+    print(f"dataset={dataset} root={root} out={out}")
+    # TODO(A): build the manifest with src.reid.manifest, validate it,
+    # print the stats/issues, and save it to `out`.
+    raise SystemExit(
+        "TODO(A): manifest generation is not implemented yet; "
+        "see src/reid/manifest.py"
+    )
 
 
 if __name__ == "__main__":

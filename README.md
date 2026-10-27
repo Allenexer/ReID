@@ -8,9 +8,10 @@
 ## 当前状态
 
 - M0 项目初始化：完成
-- M1 数据与评测就绪：进行中（manifest/指标接口已搭好，等待数据集与权重）
+- M1 数据与评测就绪：进行中（manifest/指标接口已定义，A 负责实现；等待数据集与权重）
 - 基线：TransReID（主）、CLIP-ReID（对比），已固定 commit 并提供兼容补丁
-- 环境：系统 Python 3.12 + torch 2.5.1+cu121 可用；项目 `.venv` 待建
+- 环境：项目 `.venv` 已建（复用系统 torch 2.5.1+cu121；torchvision 0.20.1、
+  timm 0.9.16、yacs 已装）
 
 ## 快速开始
 
@@ -26,13 +27,19 @@
 # 拉取上游基线（固定 commit + PyTorch 2.x 补丁）
 bash scripts/setup_third_party.sh
 
-# 数据校验 + 生成 manifest
+# 数据校验 + 生成 manifest（A 实现后可用）
 py -3 -m scripts.check_dataset --config configs/datasets/market1501.yaml
 
-# 从距离矩阵计算 mAP / CMC
+# 从距离矩阵计算 mAP / CMC（A 实现后可用）
 py -3 -m scripts.evaluate \
   --manifest data/processed/manifests/market1501.json \
   --distmat outputs/<run>/distmat.npy \
+  --output outputs/<run>/metrics.json \
+  --run-id <run>
+
+# 从上游 test_log.txt 生成 metrics.json（B 实现后可用）
+py -3 -m scripts.log_to_metrics \
+  --log outputs/<run>/test_log.txt \
   --output outputs/<run>/metrics.json \
   --run-id <run>
 

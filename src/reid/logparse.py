@@ -1,5 +1,7 @@
 """Parse mAP/CMC from upstream TransReID / CLIP-ReID logs.
 
+TODO(B): implement both functions below.
+
 Both baselines print one line per metric, for example::
 
     transreid.test INFO: mAP: 54.6%
@@ -7,36 +9,25 @@ Both baselines print one line per metric, for example::
     transreid.test INFO: CMC curve, Rank-5  :78.4%
     transreid.test INFO: CMC curve, Rank-10 :82.2%
 
-The runner uses this module to turn a log into ``metrics.json`` so numbers
-are never copied by hand.
+The parser turns such a log into ``metrics.json`` so numbers are never
+copied by hand.
 """
 
 from __future__ import annotations
-
-import re
-
-_PATTERNS = {
-    "mAP": re.compile(r"\bmAP:\s*([0-9]+(?:\.[0-9]+)?)%"),
-    "rank_1": re.compile(r"\bRank-1\s*:\s*([0-9]+(?:\.[0-9]+)?)%"),
-    "rank_5": re.compile(r"\bRank-5\s*:\s*([0-9]+(?:\.[0-9]+)?)%"),
-    "rank_10": re.compile(r"\bRank-10\s*:\s*([0-9]+(?:\.[0-9]+)?)%"),
-}
 
 
 def parse_metrics(log_text: str) -> dict[str, float]:
     """Return metrics as fractions (54.6% -> 0.546).
 
-    Raises:
-        ValueError: if no mAP line is present.
+    TODO(B): implement. Requirements:
+
+    - recognise mAP, Rank-1, Rank-5 and Rank-10;
+    - use the last occurrence of each metric (a test log may contain
+      multiple validation blocks);
+    - round to 6 decimals;
+    - raise ``ValueError`` if no mAP line is found.
     """
-    result: dict[str, float] = {}
-    for name, pattern in _PATTERNS.items():
-        matches = pattern.findall(log_text)
-        if matches:
-            result[name] = round(float(matches[-1]) / 100.0, 6)
-    if "mAP" not in result:
-        raise ValueError("no 'mAP: <number>%' line found in the log")
-    return result
+    raise NotImplementedError("B: implement parse_metrics")
 
 
 def build_metrics_payload(
@@ -47,13 +38,10 @@ def build_metrics_payload(
     baseline: str = "",
     dataset: str = "",
 ) -> dict[str, object]:
-    """Build the ``metrics.json`` payload from an upstream log."""
-    metrics = parse_metrics(log_text)
-    return {
-        "run_id": run_id,
-        "baseline": baseline,
-        "dataset": dataset,
-        "source": "upstream_log",
-        "log": log_path,
-        **metrics,
-    }
+    """Build the ``metrics.json`` payload from an upstream log.
+
+    TODO(B): implement using :func:`parse_metrics`. The payload should
+    contain ``run_id``, ``baseline``, ``dataset``, ``source`` (set to
+    ``"upstream_log"``), ``log`` and the parsed metric fields.
+    """
+    raise NotImplementedError("B: implement build_metrics_payload")

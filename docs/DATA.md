@@ -10,6 +10,20 @@
 | Move | 课程验证集，仅测试 | 待课程发布 | `data/raw/move/` |
 | CCVID | 换衣探索/加分 | 待下载 | `data/raw/ccvid/` |
 
+### 1.1 数据共享与一致性
+
+原始数据不入 git，四位成员各自保存在本机，通过以下方式同步：
+
+- Market1501：按课程提供的 Kaggle 链接各自下载；下载困难时由 A 上传到组内网盘
+  （OneDrive / Google Drive / 阿里云盘等），在群内共享链接。
+- Move：课程平台或群文件发布，按课程要求使用，不公开上传。
+- CCVID：官方仓库或组内网盘，由 C 负责。
+- 统一目录：所有人解压到 `data/raw/<dataset>/`，目录层级按本文件。
+- 一致性校验：A 在 `data/README.md` 登记来源、日期、大小与 SHA256；成员下载后
+  先核对哈希，再运行数据校验。
+- manifest 不入库：其中 `root` 为本机绝对路径，换机器后需用本地数据重新生成。
+  如确需共享，放组内网盘，不放入 git。
+
 ## 2. Market1501
 
 来源（课程给出）：<https://www.kaggle.com/datasets/pengcw1/market-1501>
@@ -41,14 +55,14 @@ data/raw/Market-1501-v15.09.15/
   bounding_box_test/
 ```
 
-生成并校验 manifest：
+生成并校验 manifest（A 实现 `scripts/check_dataset.py` 后可用）：
 
 ```bash
 py -3 -m scripts.check_dataset --config configs/datasets/market1501.yaml
 ```
 
-预期输出：query 3368 张 / 750 ID，train 12936 张 / 751 ID。若数量不符，
-先检查目录层级和文件名，不要继续跑实验。
+当前该脚本为接口骨架，运行会提示 `TODO(A)`。预期输出：query 3368 张 / 750 ID，
+train 12936 张 / 751 ID。若数量不符，先检查目录层级和文件名，不要继续跑实验。
 
 评测协议：
 
