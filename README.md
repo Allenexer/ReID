@@ -10,8 +10,8 @@
 - M0 项目初始化：完成
 - M1 数据与评测就绪：进行中（目录与职责已定，manifest/指标由 A 自行设计；等待数据集与权重）
 - 基线：TransReID（主）、CLIP-ReID（对比），已固定 commit 并提供兼容补丁
-- 环境：项目 `.venv` 已建（复用系统 torch 2.5.1+cu121；torchvision 0.20.1、
-  timm 0.9.16、yacs 已装）
+- 环境：搭建步骤与版本见 `docs/SETUP.md`（torch 2.5.x + torchvision 0.20.1、
+  timm/yacs）；已在 B 本机验证，其余成员各自在本机搭建
 
 ## 快速开始
 
