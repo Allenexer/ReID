@@ -81,6 +81,36 @@ def test_run_directory_never_overwrites_existing_results(tmp_path):
     assert marker.read_text(encoding="utf-8") == "keep"
 
 
+def test_ccvid_exports_preserve_sequence_and_clothes(tmp_path):
+    output = create_run_dir(tmp_path / "ccvid-run")
+    metrics = export_results(
+        output,
+        **sample_results(tmp_path),
+        dataset="ccvid",
+        extra_columns={
+            "sequence": ["session1/009_01", "session3/009_01", "session1/010_01"],
+            "clothes_label": ["u0_l0_s0_c0_a0", "u1_l0_s0_c0_a0", "u0_l0_s0_c0_a0"],
+            "num_frames": [30, 40, 50],
+        },
+    )
+    with (output / "gallery.csv").open(newline="", encoding="utf-8") as stream:
+        rows = list(csv.DictReader(stream))
+    assert metrics["dataset"] == "ccvid"
+    assert metrics["protocol"] == "ccvid_general"
+    assert metrics["sample_unit"] == "sequence"
+    assert rows[0]["sequence"] == "session3/009_01"
+    assert rows[0]["clothes_label"] == "u1_l0_s0_c0_a0"
+    assert rows[0]["num_frames"] == "40"
+
+
+@pytest.mark.parametrize("columns", [{"clothes_label": ["one"]}, {"pid": [1, 2, 3]}])
+def test_invalid_extra_columns_are_rejected_before_export(tmp_path, columns):
+    output = create_run_dir(tmp_path / "run")
+    with pytest.raises(ValueError):
+        export_results(output, **sample_results(tmp_path), extra_columns=columns)
+    assert not list(output.iterdir())
+
+
 def test_saved_config_can_be_reloaded_by_yacs(tmp_path, monkeypatch):
     cfg_type = pytest.importorskip("yacs.config").CfgNode
     cfg = cfg_type(

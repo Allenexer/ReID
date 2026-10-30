@@ -42,6 +42,8 @@ def export_results(
     distmat: np.ndarray,
     cmc: np.ndarray,
     mean_ap: float,
+    dataset: str = "market1501",
+    extra_columns: dict[str, list[str | int]] | None = None,
 ) -> dict[str, object]:
     """按 query/gallery 顺序保存特征、距离、指标和样本清单。"""
     num_gallery = len(records) - num_query
@@ -62,6 +64,14 @@ def export_results(
         raise ValueError("CMC 必须是非空有限数值数组")
     if not 0 <= mean_ap <= 1 or np.any((cmc < 0) | (cmc > 1)):
         raise ValueError("mAP 和 CMC 必须位于 0～1")
+    if dataset not in {"market1501", "ccvid"}:
+        raise ValueError(f"不支持的数据集：{dataset}")
+    extra_columns = extra_columns or {}
+    fields = ["index", "path", "pid", "camid", "viewid"]
+    if set(extra_columns) & set(fields) or any(
+        len(values) != len(records) for values in extra_columns.values()
+    ):
+        raise ValueError("扩展列须与样本数一致，且不能覆盖基础字段")
 
     rows = [
         {
@@ -69,12 +79,13 @@ def export_results(
             "pid": int(pid),
             "camid": int(camid),
             "viewid": int(viewid),
+            **{name: values[index] for name, values in extra_columns.items()},
         }
-        for path, pid, camid, viewid in records
+        for index, (path, pid, camid, viewid) in enumerate(records)
     ]
     for split, split_rows in (("query", rows[:num_query]), ("gallery", rows[num_query:])):
         with (output_dir / f"{split}.csv").open("x", newline="", encoding="utf-8") as stream:
-            writer = csv.DictWriter(stream, fieldnames=["index", "path", "pid", "camid", "viewid"])
+            writer = csv.DictWriter(stream, fieldnames=[*fields, *extra_columns])
             writer.writeheader()
             writer.writerows({"index": index, **row} for index, row in enumerate(split_rows))
 
@@ -89,9 +100,9 @@ def export_results(
     metrics: dict[str, object] = {
         "schema_version": 1,
         "model": "clipreid",
-        "dataset": "market1501",
+        "dataset": dataset,
         "evaluation_source": "clipreid_upstream",
-        "protocol": "market1501",
+        "protocol": "ccvid_general" if dataset == "ccvid" else "market1501",
         "distance_metric": "squared_euclidean",
         "feature_normalization": "l2",
         "re_ranking": False,
@@ -103,6 +114,9 @@ def export_results(
             f"rank{rank}": float(cmc[rank - 1]) if len(cmc) >= rank else None for rank in (1, 5, 10)
         },
     }
+    if dataset == "ccvid":
+        metrics["sample_unit"] = "sequence"
+        metrics["frames_per_sequence"] = 1
     with (output_dir / "metrics.json").open("x", encoding="utf-8") as stream:
         json.dump(metrics, stream, indent=2, ensure_ascii=False, allow_nan=False)
         stream.write("\n")
@@ -124,6 +138,8 @@ def load_run_config(
     defaults = import_module("config").cfg
 
     cfg = defaults.clone()
+    cfg.MODEL.CHECKPOINT_CLASSES = 0
+    cfg.DATASETS.FRAME_INDEX = 0
     cfg.merge_from_file(str(config_path))
     if batch_size is not None:
         cfg.TEST.IMS_PER_BATCH = batch_size
@@ -131,8 +147,8 @@ def load_run_config(
         cfg.SOLVER.SEED = seed
     if cfg.TEST.IMS_PER_BATCH <= 0 or not 0 <= cfg.SOLVER.SEED < 2**32:
         raise ValueError("batch-size 必须为正数，seed 必须位于 0～2**32-1")
-    if cfg.DATASETS.NAMES != "market1501":
-        raise ValueError("当前入口只支持 Market1501")
+    if cfg.DATASETS.NAMES not in {"market1501", "ccvid"}:
+        raise ValueError("当前入口支持 market1501 和 ccvid")
     if cfg.TEST.RE_RANKING or cfg.TEST.FEAT_NORM != "yes":
         raise ValueError("当前入口要求 TEST.RE_RANKING=False、TEST.FEAT_NORM='yes'")
     if not cfg.TEST.WEIGHT:
@@ -140,10 +156,20 @@ def load_run_config(
     cfg.DATASETS.ROOT_DIR = str((upstream / cfg.DATASETS.ROOT_DIR).resolve())
     cfg.TEST.WEIGHT = str((upstream / cfg.TEST.WEIGHT).resolve())
     cfg.OUTPUT_DIR = str(output_dir.resolve())
-    dataset = Path(cfg.DATASETS.ROOT_DIR) / "Market-1501-v15.09.15"
-    for split in ("bounding_box_train", "query", "bounding_box_test"):
-        if not (dataset / split).is_dir():
-            raise FileNotFoundError(dataset / split)
+    dataset = Path(cfg.DATASETS.ROOT_DIR)
+    if cfg.DATASETS.NAMES == "market1501":
+        dataset = dataset / "Market-1501-v15.09.15"
+        for split in ("bounding_box_train", "query", "bounding_box_test"):
+            if not (dataset / split).is_dir():
+                raise FileNotFoundError(dataset / split)
+    else:
+        if cfg.DATASETS.FRAME_INDEX < 0 or cfg.MODEL.CHECKPOINT_CLASSES <= 0:
+            raise ValueError("CCVID 要求 FRAME_INDEX 非负、CHECKPOINT_CLASSES 为正数")
+        if cfg.MODEL.SIE_CAMERA or cfg.MODEL.SIE_VIEW:
+            raise ValueError("CCVID 跨数据集基线要求关闭 SIE_CAMERA 和 SIE_VIEW")
+        for split in ("query.txt", "gallery.txt"):
+            if not (dataset / split).is_file():
+                raise FileNotFoundError(dataset / split)
     if not Path(cfg.TEST.WEIGHT).is_file():
         raise FileNotFoundError(cfg.TEST.WEIGHT)
     cfg.freeze()
@@ -213,7 +239,20 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
 
     logger = setup_logger("transreid", str(output_dir), if_train=False)
     logger.info("Running with config:\n%s", cfg)
-    _, _, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(cfg)
+    extra_columns: dict[str, list[str | int]] | None = None
+    if cfg.DATASETS.NAMES == "ccvid":
+        from .adapters.ccvid import make_ccvid_loader
+
+        val_loader, num_query, samples = make_ccvid_loader(cfg)
+        num_classes = cfg.MODEL.CHECKPOINT_CLASSES
+        camera_num = view_num = 0
+        extra_columns = {
+            "sequence": [sample.sequence for sample in samples],
+            "clothes_label": [sample.clothes_label for sample in samples],
+            "num_frames": [sample.num_frames for sample in samples],
+        }
+    else:
+        _, _, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(cfg)
     if not isinstance(val_loader.sampler, SequentialSampler):
         raise ValueError("导出顺序清单要求验证集使用 SequentialSampler")
     records = list(val_loader.dataset.dataset)
@@ -258,6 +297,8 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
         distmat=distmat,
         cmc=cmc,
         mean_ap=mean_ap,
+        dataset=cfg.DATASETS.NAMES,
+        extra_columns=extra_columns,
     )
     logger = logging.getLogger("transreid.test")
     logger.info("Validation Results")

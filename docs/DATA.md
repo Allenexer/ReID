@@ -76,11 +76,17 @@ A 实现后在此补充实际命令。预期规模：query 3368 张 / 750 ID，t
 
 ## 4. CCVID（加分）
 
-来源：<https://github.com/ziyuanzhangtony/GaitNet-CVPR2019>
+原始 FVG 来源：<https://github.com/ziyuanzhangtony/GaitNet-CVPR2019>；
+整理版 CCVID：<https://github.com/guxinqian/Simple-CCReID#ccvid-dataset>。
 
-- 视频/序列数据，换衣场景；具体划分以官方仓库和课程说明为准。
-- 使用前需要抽帧，并把 tracklet 聚合成一个检索单元（多帧特征平均或投票）。
-- 先做单帧 baseline 跑通，再比较多帧聚合；不要一上来做复杂时序模型。
+- CCVID 从 FVG 原视频检测裁剪得到，增加衣服标签和 ReID 划分；整理版已包含 JPG 帧。
+- 共 226 ID / 2856 序列 / 347833 帧；train 为 75 ID / 948 序列，
+  query 为 151 ID / 834 序列，gallery 为 151 ID / 1074 序列。
+- 数据根目录为 `data/raw/ccvid/`，直接包含 `train.txt`、`query.txt`、`gallery.txt`、
+  `readme.txt` 和 `session1/`、`session2/`、`session3/`。
+- 划分文件每行：`sequence_path pid clothes_label`。保留原有行序、身份及衣服标签。
+- C 的单帧适配默认取每段序列的首帧，复用 Market1501 权重，先计算 General 指标；
+  详见 [`CLIPREID.md`](CLIPREID.md)。随后比较多帧聚合，并与 A 对齐 CC 换衣评测。
 
 ## 5. 版本与校验
 

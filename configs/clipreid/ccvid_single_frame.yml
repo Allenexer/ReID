@@ -1,0 +1,28 @@
+MODEL:
+  NAME: 'ViT-B-16'
+  STRIDE_SIZE: [16, 16]
+  SIE_CAMERA: False
+  SIE_VIEW: False
+  CHECKPOINT_CLASSES: 751
+
+INPUT:
+  SIZE_TRAIN: [256, 128]
+  SIZE_TEST: [256, 128]
+  PIXEL_MEAN: [0.5, 0.5, 0.5]
+  PIXEL_STD: [0.5, 0.5, 0.5]
+
+DATASETS:
+  NAMES: 'ccvid'
+  ROOT_DIR: '../../data/raw/ccvid'
+  FRAME_INDEX: 0
+
+DATALOADER:
+  NUM_WORKERS: 0
+
+TEST:
+  EVAL: True
+  IMS_PER_BATCH: 8
+  NECK_FEAT: 'before'
+  FEAT_NORM: 'yes'
+  RE_RANKING: False
+  WEIGHT: '../../checkpoints/clipreid_market_vit_b16.pth'
