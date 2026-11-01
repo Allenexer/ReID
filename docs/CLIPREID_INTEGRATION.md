@@ -69,7 +69,8 @@ Q、G、D 分别为 query 数、gallery 数和特征维度。`distmat[i, j]` 对
 
 以上规模对应当前完整划分。CCVID 的 camid 为评测协议编号，并非物理摄像头编号。
 两套当前协议均剔除同 pid、同 camid 的 gallery 样本。CCVID General 允许同衣和换衣匹配；
-CC/SC 协议尚未接入，不能将 General 指标标为换衣专用指标。
+C 的推理入口仍输出 General；A 的统一评测已支持 CC/SC，分别输出，不能将 General
+指标改名为换衣专用指标。
 
 多帧测试按文件名排序后均匀抽帧，平均原始特征后再做 L2 归一化；短序列使用全部帧。
 T=1 使用 `FRAME_INDEX`，T>1 包含序列首尾。CCVID 配置使用 Market1501 预训练权重，
@@ -82,8 +83,8 @@ T=1 使用 `FRAME_INDEX`，T>1 包含序列首尾。CCVID 配置使用 Market150
 读取同一次运行的 `distmat.npy,query.csv,gallery.csv`，按对应协议复算 mAP 和 CMC。
 与原 `metrics.json` 比较时使用同一矩阵、相同过滤规则，指标误差应小于 0.1 个百分点。
 
-统一使用余弦距离时，可从归一化特征重新计算。平方欧氏距离与余弦距离排序等价，
-数值不同，应保留实际距离类型。同矩阵对拍与距离统一分别验证。
+统一使用余弦距离时，可从归一化特征重新计算。平方欧氏距离理论上为余弦距离的两倍；
+有限精度与并列项可能改变排序，应保留实际距离类型。同矩阵对拍与距离统一分别验证。
 
 ### 入口与报告汇总
 
@@ -94,8 +95,21 @@ T=1 使用 `FRAME_INDEX`，T>1 包含序列首尾。CCVID 配置使用 Market150
 实验产物不随 Git 分发。指标复算按需共享矩阵及两份清单，或在本机重新生成；
 报告汇总按需共享指标 JSON 和复现记录。
 
-### 待对齐事项
+### A 的统一评测接入
 
-- 公共 manifest 字段与评测函数的调用方式。
-- CC/SC 协议定义、实现分工及验证样例。
-- 统一入口及报告汇总所需的字段映射。
+```bash
+conda run -n rl_v2 python scripts/evaluate.py --run-dir outputs/<run> \
+  --protocol ccvid_cc --distance native \
+  --output-dir outputs/<run>/evaluation/ccvid_cc/native
+```
+
+General 仅过滤同 pid 同 camid；CC 额外过滤同 pid 同衣，SC 额外过滤同 pid 不同衣。
+不同 pid 的同名衣服仍保留为负样本。无有效 query 时报错。
+输出包含 `metrics.json,status.json,verification.json`，cosine 模式另存派生矩阵；
+原始归档不覆盖。A 保留基础与帧数字段，指标标度仍为 0～1，JSON 保留 6 位，
+增加 `evaluation_source=reid_unified`、有效/跳过 query 数、来源及派生 SHA256。
+同协议以原矩阵复算后比较原完整精度指标；跨协议明确记为不可比较。
+
+D 显式读取 `evaluation/<protocol>/<distance>/metrics.json`，只汇总 success，
+按 protocol/distance/帧数分组，不把 C 原指标与 A 派生指标重复计作独立实验。
+详细公共 API、原始 manifest 对照方式和验收命令见 [`A_EVALUATION.md`](A_EVALUATION.md)。

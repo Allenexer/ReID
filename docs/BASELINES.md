@@ -72,7 +72,8 @@ python test.py \
 yacs 的，表示字符串 `none`。跑通后再把 batch 加到 16。
 
 上游把日志写到 `OUTPUT_DIR/test_log.txt`（注意不是 `test.log`），里面会有
-`mAP:`、`Rank-1/5/10`。这是唯一允许写进报告的指标来源，不要手抄日志里的数字。
+`mAP:`、`Rank-1/5/10`。保留原日志；统一评测与报告使用同次归档的完整精度数组和指标，
+不从四舍五入的日志恢复精度。
 
 `scripts/log_to_metrics.py` 的命令行由 B 设计；B 实现后在此补充实际命令。实现前
 保留原始 `test_log.txt`，不要把日志里的数字手工填进报告。
@@ -113,16 +114,11 @@ python test_clipreid.py \
 
 上游 `make_dataloader` 一定会读 `dataset.train`，`make_model` 用
 `num_train_pids` 决定分类头大小，`load_param` 直接按 key `copy_`。Move 只有
-query/gallery，直接套用会失败。候选方案（按优先级）：
-
-1. **自定义 dataset 类**：在 `src/reid/adapters/` 注册一个只含 query/gallery 的
-   dataset，`train` 用 gallery 中每 ID 的几张图占位，`num_train_pids` 固定为
-   checkpoint 的分类数（Market1501 为 751），避免分类头尺寸不匹配；
-2. **Market1501 兼容目录**：把 Move 转成 `query/` + `bounding_box_test/` 命名，
-   让上游原样读取；
-3. 修改上游 `make_dataloader`，跳过训练集构造（补丁放 `patches/`）。
-
-方案选定后更新本节。在 Move 数据到手前，先用 Market1501 跑通全链路。
+query/gallery，直接套用会失败。B/C 的 test-only loader 应只构造 query/gallery，
+分类头尺寸使用 checkpoint 的类别数（例如 Market1501 权重为 751）。不得用 gallery
+占训练集，也不重命名或复制原数据制造训练划分。A 接收标准标签表
+`split,path,pid,camid`；课程原标签映射、相机及过滤规则在 Move 发布后核实。
+目前此项是待 B/C 接入的契约，不能记作两基线已支持 Move 正式指标。
 
 ## 7. 输出契约
 
@@ -137,4 +133,8 @@ outputs/<run-id>/
   git.txt         本项目 commit + 上游 commit
 ```
 
-`metrics.json` 的字段由 A 在评测实现时定稿并写入文档；报告只引用它。
+统一评测还需同次归档的 `distmat.npy,query_features.npy,gallery_features.npy,query.csv,
+gallery.csv,status.json`，由 B 承接 C 的现有格式导出；保留实际加载顺序、距离类型、
+归一化及重排序状态。Market1501 的 viewid 分别为 TransReID=1、CLIP-ReID=0。
+A 接口和 D 的读取路径见 [`A_EVALUATION.md`](A_EVALUATION.md)。B 的导出与 D 的汇总
+属于待接入契约，A 不修改两者的职责模块。

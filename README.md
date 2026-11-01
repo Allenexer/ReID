@@ -8,7 +8,7 @@
 ## 当前状态
 
 - M0 项目初始化：完成
-- M1 数据与评测就绪：进行中（目录与职责已定，manifest/指标由 A 自行设计；等待数据集与权重）
+- M1 数据与评测：A 的 manifest、统一指标和归档评测已实现；真实模型矩阵验收待权重与运行产物
 - 基线：TransReID（主）、CLIP-ReID（对比），已固定 commit 并提供兼容补丁
 - 环境：搭建步骤与版本见 `docs/SETUP.md`（torch 2.5.x + torchvision 0.20.1、
   timm/yacs）；已在一台机器上验证，各成员各自在本机搭建
@@ -27,12 +27,22 @@
 # 拉取上游基线（固定 commit + PyTorch 2.x 补丁）
 bash scripts/setup_third_party.sh
 
-# 测试与格式
-py -3 -m pytest -q
-ruff format . && ruff check --fix .
+# 生成 CCVID 官方划分清单（原始数据只读）
+conda run -n rl_v2 python scripts/check_dataset.py --dataset ccvid \
+  --root data/raw/ccvid --manifest data/processed/manifests/ccvid.json
+
+# 对 C/B 的同一次成功归档复算，结果写入新目录
+conda run -n rl_v2 python scripts/evaluate.py --run-dir outputs/<run> \
+  --protocol ccvid_general --distance native \
+  --output-dir outputs/<run>/evaluation/ccvid_general/native
+
+# 同时发现原有测试和工作区根目录 test/ 中的 A 测试
+conda run -n rl_v2 python -m pytest -c pyproject.toml tests ../test -ra
 ```
 
-数据集、评测与日志转换脚本由负责人实现后，在 `scripts/README.md` 与本文档补充实际命令。
+A 的接口、三种 CCVID 协议、距离统一、测试依赖及 B/D 交接见
+[`docs/A_EVALUATION.md`](docs/A_EVALUATION.md)。`../test/` 位于本 Git 仓库外，
+提交或拷贝项目时须独立携带，不另复制一套。
 
 ## 目录
 

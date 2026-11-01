@@ -1,0 +1,307 @@
+{
+  "schema_version": 1,
+  "recorded_at": "2026-11-01T13:52:58.377773+00:00",
+  "branch": "zzj_a_part",
+  "kind": "data_and_evaluator_validation_not_model_performance",
+  "environment": {
+    "python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+    "numpy": "2.2.6",
+    "pytest": "9.0.3",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "conda_environment": "rl_v2",
+    "temporary_project_dependencies": "/tmp/reid-a-deps",
+    "upstream_numpy": "1.26.4",
+    "upstream_sources": "/tmp/reid-a-upstream"
+  },
+  "command_from_workspace": "PYTHONPATH=/tmp/reid-a-deps conda run -n rl_v2 python -m pytest -c ReID/pyproject.toml ReID/tests test --data-root ReID/data/raw/ccvid --market-root ReID/data/raw --upstream-root /tmp/reid-a-upstream --upstream-pythonpath /tmp/reid-a-upstream-deps -o cache_dir=/tmp/reid-a-pytest-cache --junitxml=/tmp/reid-a-full-validation.xml -ra",
+  "tests": {
+    "collected": 137,
+    "passed": 135,
+    "skipped": 2,
+    "seconds": 43.329,
+    "skip_reasons": [
+      "真实 run 对拍未执行：请显式提供 --run-dir",
+      "真实 run 对拍未执行：请显式提供 --run-dir"
+    ]
+  },
+  "source_sha256": {
+    "src/reid/manifest.py": "f2d1f76d658a65fee718ac89147b674693e847c9bda039543aae3fc03d687b20",
+    "src/reid/metrics.py": "4dd0741badd56018aef9ccea95cc9bde1dc93c57fa12c7245efb21966d2c3458",
+    "src/reid/features.py": "8fea67b33108f8b27ffa44a97adc9a6b793476d76e6b8ffd3f70f860cf7b4aee",
+    "src/reid/storage.py": "362913467bb67569839a8f1641795c24dd41475ee19935f2716b3bb5998bbfcc",
+    "src/reid/artifacts.py": "d27cce6ec79e3a183f68d275869224bffd4ea2e8b119818814d4ad2eba1d90e4",
+    "src/reid/adapters/market1501.py": "a9f8a54e0f8ade71f41d63721b06e28ba507e03ef894cead6266b89fa854da84",
+    "src/reid/adapters/move.py": "a25055a61db338f453ae3b408adb154712a9f14d0cf22c7e75c97fd059089686",
+    "scripts/check_dataset.py": "1d63eb1d15ca49bedf0551f5388e114e8bcdb38279d7df9847563f03d98a9a26",
+    "scripts/evaluate.py": "3fc0cded9e4382ab2cc4dc4dd69d27c47ced43069b8a32bc20d99915aab14c3b"
+  },
+  "external_test_directory": "../test",
+  "test_sha256": {
+    "conftest.py": "a539b640750ec414e2209d0ed00a238b174ce05e977ad3cb21246eb49d43e7f3",
+    "test_upstream_parity.py": "4e1868f61fff6e8196d596ffbaed19dfb5218d3cb3865e095a82b87ebb5f19a9",
+    "test_cli.py": "159bd74f1eab61109dfe3c799e256d8ad0b202bcfda3f2565e3bf42c9b00c6e4",
+    "test_metrics.py": "4bae49b6afdb45655117e56f0547558d1336de4fa50f7fade9e354ab3132b391",
+    "test_data_local.py": "d7f6529dad959e4648770e4d42679ddf2f5286b08589c67b19167b65c8a88c7e",
+    "test_clipreid_contract.py": "d16b757a307e971b0b6e6ca6c3177428c9c0e07f3b1dde7b1ddab58fac7eccc8",
+    "test_manifest.py": "6c88a009e21af3c056702e5daa740a2876e46dd9fadd244d9eaa6c9f3b938993",
+    "test_ccvid_protocols.py": "d0b6201c8a460a3aa287aa7404ff610f97455bf6fb908003013c9931f162c609"
+  },
+  "python38_syntax": {
+    "status": "passed",
+    "files": [
+      "src/reid/manifest.py",
+      "src/reid/metrics.py",
+      "src/reid/features.py",
+      "src/reid/storage.py",
+      "src/reid/artifacts.py",
+      "src/reid/adapters/market1501.py",
+      "src/reid/adapters/move.py",
+      "scripts/check_dataset.py",
+      "scripts/evaluate.py"
+    ],
+    "scope": "ast.parse(feature_version=(3, 8)); not a Python 3.8 runtime test"
+  },
+  "data_validation": {
+    "market1501": {
+      "valid": true,
+      "errors": [],
+      "statistics": {
+        "train": {
+          "samples": 12936,
+          "identities": 751
+        },
+        "query": {
+          "samples": 3368,
+          "identities": 750
+        },
+        "gallery": {
+          "samples": 15913,
+          "identities": 751
+        }
+      },
+      "verified_images": 32217
+    },
+    "ccvid": {
+      "valid": true,
+      "errors": [],
+      "statistics": {
+        "train": {
+          "samples": 948,
+          "identities": 75,
+          "frames": 118613
+        },
+        "query": {
+          "samples": 834,
+          "identities": 151,
+          "frames": 116799
+        },
+        "gallery": {
+          "samples": 1074,
+          "identities": 151,
+          "frames": 112421
+        }
+      },
+      "verified_images": 347833
+    }
+  },
+  "manifest_sha256": {
+    "market1501": "c282639ee936cf368e72ce1821f12a7ab246f0db20e39707e71228204088231e",
+    "ccvid": "5520242c22c75757745dbd949f61f064cd90d90b691c8845bf16ef67e7208c29"
+  },
+  "market1501_archive": {
+    "source": "https://www.kaggle.com/api/v1/datasets/download/pengcw1/market-1501",
+    "started_at": "2026-11-01T13:43:18.623087+00:00",
+    "downloaded_at": "2026-11-01T13:43:42.890269+00:00",
+    "bytes": 153011595,
+    "sha256": "5d3ff58679b1867e3256643b44e1f06a5df1d3a32e367960bba46457f86875ca",
+    "download_seconds": 24.267182654000408,
+    "official_sha256_available": false,
+    "crc_all_entries": true,
+    "extracted_to": "/home/zjzheng/Lesson/CV/PJ/ReID/data/raw/Market-1501-v15.09.15",
+    "total_seconds": 36.21714919900023
+  },
+  "upstream_evidence": [
+    {
+      "test": "test_pinned_market_hand_example[CLIP-ReID]",
+      "name": "CLIP-ReID/market1501",
+      "result": {
+        "producer": "CLIP-ReID",
+        "commit": "eb1898b72c882875f478bebfc6d41644eece0a5d",
+        "source_sha256": "60c67732b652a7b748d67d7e7ed772eec471f6fc654111a9f2a2f16d54289bc9",
+        "protocol": "market1501",
+        "shape": [
+          3,
+          60
+        ],
+        "unified_mAP": 0.75,
+        "upstream_mAP": 0.75,
+        "mAP_absolute_difference": 0.0,
+        "cmc_max_absolute_difference": 0.0,
+        "upstream_numpy": "1.26.4",
+        "upstream_python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+        "unified_numpy": "2.2.6"
+      }
+    },
+    {
+      "test": "test_pinned_market_hand_example[TransReID]",
+      "name": "TransReID/market1501",
+      "result": {
+        "producer": "TransReID",
+        "commit": "dec55046fcdfadee14e2c28e2df89305d8f7557a",
+        "source_sha256": "60c67732b652a7b748d67d7e7ed772eec471f6fc654111a9f2a2f16d54289bc9",
+        "protocol": "market1501",
+        "shape": [
+          3,
+          60
+        ],
+        "unified_mAP": 0.75,
+        "upstream_mAP": 0.75,
+        "mAP_absolute_difference": 0.0,
+        "cmc_max_absolute_difference": 0.0,
+        "upstream_numpy": "1.26.4",
+        "upstream_python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+        "unified_numpy": "2.2.6"
+      }
+    },
+    {
+      "test": "test_pinned_clothes_hand_example[ccvid_general]",
+      "name": "Simple-CCReID/ccvid_general",
+      "result": {
+        "producer": "Simple-CCReID",
+        "commit": "f773d013508a7697f09ff0ca5f1622dfc46aa531",
+        "source_sha256": "e53b17f66ee62d775993fea18856cd0c7433ae496cc87b339c75a2f3a7879f2c",
+        "protocol": "ccvid_general",
+        "shape": [
+          1,
+          60
+        ],
+        "unified_mAP": 0.8333333333333333,
+        "upstream_mAP": 0.8333333333333333,
+        "mAP_absolute_difference": 0.0,
+        "cmc_max_absolute_difference": 0.0,
+        "upstream_numpy": "1.26.4",
+        "upstream_python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+        "unified_numpy": "2.2.6"
+      }
+    },
+    {
+      "test": "test_pinned_clothes_hand_example[ccvid_cc]",
+      "name": "Simple-CCReID/ccvid_cc",
+      "result": {
+        "producer": "Simple-CCReID",
+        "commit": "f773d013508a7697f09ff0ca5f1622dfc46aa531",
+        "source_sha256": "e53b17f66ee62d775993fea18856cd0c7433ae496cc87b339c75a2f3a7879f2c",
+        "protocol": "ccvid_cc",
+        "shape": [
+          1,
+          60
+        ],
+        "unified_mAP": 0.5,
+        "upstream_mAP": 0.5,
+        "mAP_absolute_difference": 0.0,
+        "cmc_max_absolute_difference": 0.0,
+        "upstream_numpy": "1.26.4",
+        "upstream_python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+        "unified_numpy": "2.2.6"
+      }
+    },
+    {
+      "test": "test_pinned_clothes_hand_example[ccvid_sc]",
+      "name": "Simple-CCReID/ccvid_sc",
+      "result": {
+        "producer": "Simple-CCReID",
+        "commit": "f773d013508a7697f09ff0ca5f1622dfc46aa531",
+        "source_sha256": "e53b17f66ee62d775993fea18856cd0c7433ae496cc87b339c75a2f3a7879f2c",
+        "protocol": "ccvid_sc",
+        "shape": [
+          1,
+          60
+        ],
+        "unified_mAP": 1.0,
+        "upstream_mAP": 1.0,
+        "mAP_absolute_difference": 0.0,
+        "cmc_max_absolute_difference": 0.0,
+        "upstream_numpy": "1.26.4",
+        "upstream_python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+        "unified_numpy": "2.2.6"
+      }
+    },
+    {
+      "test": "test_pinned_non_degenerate_matrix[CLIP-ReID]",
+      "name": "CLIP-ReID/market1501/random",
+      "result": {
+        "producer": "CLIP-ReID",
+        "commit": "eb1898b72c882875f478bebfc6d41644eece0a5d",
+        "source_sha256": "60c67732b652a7b748d67d7e7ed772eec471f6fc654111a9f2a2f16d54289bc9",
+        "protocol": "market1501",
+        "shape": [
+          12,
+          180
+        ],
+        "unified_mAP": 0.08753852915288617,
+        "upstream_mAP": 0.08753852915288618,
+        "mAP_absolute_difference": 1.3877787807814457e-17,
+        "cmc_max_absolute_difference": 1.9868214962137642e-08,
+        "upstream_numpy": "1.26.4",
+        "upstream_python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+        "unified_numpy": "2.2.6"
+      }
+    },
+    {
+      "test": "test_pinned_non_degenerate_matrix[TransReID]",
+      "name": "TransReID/market1501/random",
+      "result": {
+        "producer": "TransReID",
+        "commit": "dec55046fcdfadee14e2c28e2df89305d8f7557a",
+        "source_sha256": "60c67732b652a7b748d67d7e7ed772eec471f6fc654111a9f2a2f16d54289bc9",
+        "protocol": "market1501",
+        "shape": [
+          12,
+          180
+        ],
+        "unified_mAP": 0.08753852915288617,
+        "upstream_mAP": 0.08753852915288618,
+        "mAP_absolute_difference": 1.3877787807814457e-17,
+        "cmc_max_absolute_difference": 1.9868214962137642e-08,
+        "upstream_numpy": "1.26.4",
+        "upstream_python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+        "unified_numpy": "2.2.6"
+      }
+    },
+    {
+      "test": "test_real_market_loader_order[CLIP-ReID-0-e9859bf35cb0b706d391adc0b35999a8968a70c30d5ad57220eef8d8c0ee423b]",
+      "name": "CLIP-ReID/real_market_loader",
+      "result": {
+        "commit": "eb1898b72c882875f478bebfc6d41644eece0a5d",
+        "source_sha256": "e9859bf35cb0b706d391adc0b35999a8968a70c30d5ad57220eef8d8c0ee423b",
+        "checked_rows": {
+          "train": 12936,
+          "query": 3368,
+          "gallery": 15913
+        },
+        "viewid": 0,
+        "train_relabel": false
+      }
+    },
+    {
+      "test": "test_real_market_loader_order[TransReID-1-961c00a1fc9ee08a2ddc1844e21cf9efa5db1c60f5a5b7ad041332336812ab3d]",
+      "name": "TransReID/real_market_loader",
+      "result": {
+        "commit": "dec55046fcdfadee14e2c28e2df89305d8f7557a",
+        "source_sha256": "961c00a1fc9ee08a2ddc1844e21cf9efa5db1c60f5a5b7ad041332336812ab3d",
+        "checked_rows": {
+          "train": 12936,
+          "query": 3368,
+          "gallery": 15913
+        },
+        "viewid": 1,
+        "train_relabel": false
+      }
+    }
+  ],
+  "remaining_acceptance": [
+    "真实 B/C 模型 run 的全矩阵 native/cosine 同协议对拍",
+    "Move 发布后的原始标签映射、相机过滤协议与 B/C test-only 接入",
+    "B 导出及 D 汇总为待接入契约，A 未修改其职责代码"
+  ]
+}
