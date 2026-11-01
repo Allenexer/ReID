@@ -20,6 +20,7 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, help="新的输出目录；相对路径基于项目根目录")
     parser.add_argument("--batch-size", type=int, help="覆盖配置中的推理 batch size")
     parser.add_argument("--seed", type=int, help="覆盖配置中的随机种子")
+    parser.add_argument("--frames", type=int, help="CCVID 每个序列的采样帧数")
     parser.add_argument("--dry-run", action="store_true", help="只检查路径和配置，不推理或写入")
     args = parser.parse_args()
     started = datetime.now()
@@ -27,7 +28,9 @@ def main() -> None:
     output_dir = args.output_dir or Path(
         "outputs", f"{started:%Y%m%d-%H%M}-clipreid-{name}-{started:%S%f}"
     )
-    cfg = load_run_config(ROOT, ROOT / args.config, ROOT / output_dir, args.batch_size, args.seed)
+    cfg = load_run_config(
+        ROOT, ROOT / args.config, ROOT / output_dir, args.batch_size, args.seed, args.frames
+    )
     if args.dry_run:
         print("路径和配置检查通过；未运行 GPU，未创建输出目录。")
         print(cfg.dump())
