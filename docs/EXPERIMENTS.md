@@ -15,6 +15,9 @@
 | Run ID | 日期 | 分支/commit | 配置 | 数据版本 | 主指标 | 对比基线 | 结论 |
 |---|---|---|---|---|---|---|---|
 | — | — | — | — | — | — | — | — |
+| 20261101-1625-clipreid-ccvid-multiframe-25588451 | 2026-11-01 | exp/c-ccvid-multiframe，版本见 git.txt | configs/clipreid/ccvid_multiframe.yml，--frames 1 | CCVID 官方划分（General） | [metrics.json](../outputs/20261101-1625-clipreid-ccvid-multiframe-25588451/metrics.json) | 20261101-1555-clipreid-ccvid-single-frame-33182134 | 特征、距离矩阵和指标与基线完全一致 |
+| 20261101-1628-clipreid-ccvid-multiframe-29605161 | 2026-11-01 | exp/c-ccvid-multiframe，版本见 git.txt | configs/clipreid/ccvid_multiframe.yml，--frames 4 | CCVID 官方划分（General） | [metrics.json](../outputs/20261101-1628-clipreid-ccvid-multiframe-29605161/metrics.json) | 20261101-1625-clipreid-ccvid-multiframe-25588451 | 仅改变采样帧数，mAP、Rank-1/5/10 均提升，耗时增加 |
+| 20261101-1629-clipreid-ccvid-multiframe-41578689 | 2026-11-01 | exp/c-ccvid-multiframe，版本见 git.txt | configs/clipreid/ccvid_multiframe.yml，--frames 8 | CCVID 官方划分（General） | [metrics.json](../outputs/20261101-1629-clipreid-ccvid-multiframe-41578689/metrics.json) | 20261101-1628-clipreid-ccvid-multiframe-29605161 | 仅改变采样帧数，mAP 略低，Rank-1 相同，耗时增加 |
 
 ## 约定
 

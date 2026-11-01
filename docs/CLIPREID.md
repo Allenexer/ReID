@@ -1,6 +1,6 @@
 # CLIP-ReID 专用运行流程
 
-目标：运行 Market1501 或 CCVID 单帧基线，将一次推理所需的配置、环境、版本、
+目标：运行 Market1501 或 CCVID 基线，将一次推理所需的配置、环境、版本、
 上游指标和可复算结果保存到独立运行目录。入口放 `scripts/`，可复用逻辑放
 `src/reid/clipreid.py`；不修改上游文件，不实现 A 的公共评测或 B 的日志解析器。
 
@@ -68,6 +68,29 @@ python scripts/run_clipreid.py --config configs/clipreid/ccvid_single_frame.yml
 指标标记 `dataset=ccvid`、`protocol=ccvid_general`，使用上游评测器计算 General
 mAP/CMC；General 允许同衣和换衣匹配。衣服标签保留供后续 CC/SC 协议使用。
 General 指标不能标为 CC 换衣指标；与 A 对拍后再接入公共评测。
+
+## CCVID 多帧聚合
+
+按文件名排序后均匀抽取 T 帧，包含序列首尾；不足 T 帧时使用全部帧，不重复采样。
+先平均各帧的原始特征，再 L2 归一化。T=1 仍使用 `FRAME_INDEX`，与单帧基线一致；
+T>1 要求 `FRAME_INDEX=0`。
+
+```bash
+python scripts/run_clipreid.py --config configs/clipreid/ccvid_multiframe.yml --frames 1
+python scripts/run_clipreid.py --config configs/clipreid/ccvid_multiframe.yml --frames 4
+python scripts/run_clipreid.py --config configs/clipreid/ccvid_multiframe.yml --frames 8
+```
+
+`DATASETS.NUM_FRAMES` 未配置时为 1，多帧配置中为 8，可用 `--frames` 覆盖。GPU batch 按帧计数，序列特征在
+CPU 聚合，检索矩阵保持 834 × 1074。CSV 的 `path` 保持首个选中帧，另存
+`sampled_frames`（实际采样数）与 `frame_paths`（JSON 路径列表）。
+
+`metrics.json` 记录请求的 `frames_per_sequence`、抽帧方式和聚合方式。
+`inference_seconds` 包含数据读取、权重加载、特征提取及评测，不含环境记录和结果导出。
+帧数、耗时及指标用于 1/4/8 帧对照；当前仍采用 General 协议和同一 Market1501 权重。
+
+验收：均匀采样可复现；短序列不重复帧；跨 batch 的序列边界正确；单帧结果保持一致；
+导出的特征、清单和距离矩阵均按序列对齐。
 
 数据定义参考[官方加载器](https://github.com/guxinqian/Simple-CCReID/blob/main/data/datasets/ccvid.py)，
 General 过滤规则参考[官方评测](https://github.com/guxinqian/Simple-CCReID/blob/main/tools/eval_metrics.py)。

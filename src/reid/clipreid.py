@@ -15,6 +15,7 @@ import traceback
 from datetime import datetime, timezone
 from importlib import import_module
 from pathlib import Path
+from time import perf_counter
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -44,6 +45,8 @@ def export_results(
     mean_ap: float,
     dataset: str = "market1501",
     extra_columns: dict[str, list[str | int]] | None = None,
+    frames_per_sequence: int = 1,
+    inference_seconds: float | None = None,
 ) -> dict[str, object]:
     """按 query/gallery 顺序保存特征、距离、指标和样本清单。"""
     num_gallery = len(records) - num_query
@@ -66,6 +69,12 @@ def export_results(
         raise ValueError("mAP 和 CMC 必须位于 0～1")
     if dataset not in {"market1501", "ccvid"}:
         raise ValueError(f"不支持的数据集：{dataset}")
+    if frames_per_sequence <= 0 or (dataset == "market1501" and frames_per_sequence != 1):
+        raise ValueError("帧数须为正数，Market1501 每个样本仅一张图片")
+    if inference_seconds is not None and (
+        not np.isfinite(inference_seconds) or inference_seconds < 0
+    ):
+        raise ValueError("推理耗时须为非负有限数值")
     extra_columns = extra_columns or {}
     fields = ["index", "path", "pid", "camid", "viewid"]
     if set(extra_columns) & set(fields) or any(
@@ -116,7 +125,11 @@ def export_results(
     }
     if dataset == "ccvid":
         metrics["sample_unit"] = "sequence"
-        metrics["frames_per_sequence"] = 1
+        metrics["frames_per_sequence"] = frames_per_sequence
+        metrics["frame_sampling"] = "uniform" if frames_per_sequence > 1 else "index"
+        metrics["aggregation"] = "mean_then_l2"
+    if inference_seconds is not None:
+        metrics["inference_seconds"] = inference_seconds
     with (output_dir / "metrics.json").open("x", encoding="utf-8") as stream:
         json.dump(metrics, stream, indent=2, ensure_ascii=False, allow_nan=False)
         stream.write("\n")
@@ -129,6 +142,7 @@ def load_run_config(
     output_dir: Path,
     batch_size: int | None = None,
     seed: int | None = None,
+    frames: int | None = None,
 ) -> CfgNode:
     """合并配置，以 CLIP-ReID 目录为基准解析数据和权重路径。"""
     upstream = root / "third_party" / "CLIP-ReID"
@@ -140,15 +154,22 @@ def load_run_config(
     cfg = defaults.clone()
     cfg.MODEL.CHECKPOINT_CLASSES = 0
     cfg.DATASETS.FRAME_INDEX = 0
+    cfg.DATASETS.NUM_FRAMES = 1
     cfg.merge_from_file(str(config_path))
     if batch_size is not None:
         cfg.TEST.IMS_PER_BATCH = batch_size
     if seed is not None:
         cfg.SOLVER.SEED = seed
+    if frames is not None:
+        cfg.DATASETS.NUM_FRAMES = frames
     if cfg.TEST.IMS_PER_BATCH <= 0 or not 0 <= cfg.SOLVER.SEED < 2**32:
         raise ValueError("batch-size 必须为正数，seed 必须位于 0～2**32-1")
     if cfg.DATASETS.NAMES not in {"market1501", "ccvid"}:
         raise ValueError("当前入口支持 market1501 和 ccvid")
+    if cfg.DATASETS.NUM_FRAMES <= 0 or (
+        cfg.DATASETS.NAMES == "market1501" and cfg.DATASETS.NUM_FRAMES != 1
+    ):
+        raise ValueError("NUM_FRAMES 须为正数，Market1501 仅支持 1 帧")
     if cfg.TEST.RE_RANKING or cfg.TEST.FEAT_NORM != "yes":
         raise ValueError("当前入口要求 TEST.RE_RANKING=False、TEST.FEAT_NORM='yes'")
     if not cfg.TEST.WEIGHT:
@@ -165,6 +186,8 @@ def load_run_config(
     else:
         if cfg.DATASETS.FRAME_INDEX < 0 or cfg.MODEL.CHECKPOINT_CLASSES <= 0:
             raise ValueError("CCVID 要求 FRAME_INDEX 非负、CHECKPOINT_CLASSES 为正数")
+        if cfg.DATASETS.NUM_FRAMES > 1 and cfg.DATASETS.FRAME_INDEX != 0:
+            raise ValueError("均匀抽帧要求 FRAME_INDEX=0")
         if cfg.MODEL.SIE_CAMERA or cfg.MODEL.SIE_VIEW:
             raise ValueError("CCVID 跨数据集基线要求关闭 SIE_CAMERA 和 SIE_VIEW")
         for split in ("query.txt", "gallery.txt"):
@@ -228,6 +251,7 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
     setup_logger = import_module("utils.logger").setup_logger
     evaluator_type = import_module("utils.metrics").R1_mAP_eval
 
+    started = perf_counter()
     if not torch.cuda.is_available():
         raise RuntimeError("需要可用的 CUDA 版 PyTorch；请在能访问 GPU 的 WSL 终端运行")
     random.seed(cfg.SOLVER.SEED)
@@ -240,6 +264,7 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
     logger = setup_logger("transreid", str(output_dir), if_train=False)
     logger.info("Running with config:\n%s", cfg)
     extra_columns: dict[str, list[str | int]] | None = None
+    samples = None
     if cfg.DATASETS.NAMES == "ccvid":
         from .adapters.ccvid import make_ccvid_loader
 
@@ -250,13 +275,26 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
             "sequence": [sample.sequence for sample in samples],
             "clothes_label": [sample.clothes_label for sample in samples],
             "num_frames": [sample.num_frames for sample in samples],
+            "sampled_frames": [len(sample.frame_paths) for sample in samples],
+            "frame_paths": [
+                json.dumps(
+                    [
+                        path.relative_to(cfg.DATASETS.ROOT_DIR).as_posix()
+                        for path in sample.frame_paths
+                    ]
+                )
+                for sample in samples
+            ],
         }
     else:
         _, _, val_loader, num_query, num_classes, camera_num, view_num = make_dataloader(cfg)
     if not isinstance(val_loader.sampler, SequentialSampler):
         raise ValueError("导出顺序清单要求验证集使用 SequentialSampler")
-    records = list(val_loader.dataset.dataset)
-    logger.info("query=%d, gallery=%d", num_query, len(records) - num_query)
+    frame_records = list(val_loader.dataset.dataset)
+    records = [sample.as_record() for sample in samples] if samples else frame_records
+    logger.info(
+        "query=%d, gallery=%d, frames=%d", num_query, len(records) - num_query, len(frame_records)
+    )
     model = make_model(cfg, num_class=num_classes, camera_num=camera_num, view_num=view_num)
     model.load_param(cfg.TEST.WEIGHT)
     if torch.cuda.device_count() > 1:
@@ -265,11 +303,12 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
     evaluator = evaluator_type(num_query, max_rank=50, feat_norm=cfg.TEST.FEAT_NORM)
     evaluator.reset()
     position = 0
+    frame_batches = []
     with torch.inference_mode():
         for images, pids, camids, cam_labels, view_labels, names in val_loader:
             expected = [
                 (Path(path).name, int(pid), int(camid), int(viewid))
-                for path, pid, camid, viewid in records[position : position + len(names)]
+                for path, pid, camid, viewid in frame_records[position : position + len(names)]
             ]
             actual = [
                 (name, int(pid), int(camid), int(viewid))
@@ -282,11 +321,23 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
                 cam_label=cam_labels.to("cuda") if cfg.MODEL.SIE_CAMERA else None,
                 view_label=view_labels.to("cuda") if cfg.MODEL.SIE_VIEW else None,
             )
-            evaluator.update((features, pids, camids))
+            frame_batches.append(features.cpu())
             position += len(names)
-    if position != len(records):
+    if position != len(frame_records):
         raise ValueError("验证集未被完整遍历")
+    features = torch.cat(frame_batches, dim=0)
+    if samples:
+        from .adapters.ccvid import mean_pool_features
+
+        pooled = mean_pool_features(
+            features.numpy(), [len(sample.frame_paths) for sample in samples]
+        )
+        features = torch.from_numpy(pooled)
+    evaluator.update(
+        (features, [record[1] for record in records], [record[2] for record in records])
+    )
     cmc, mean_ap, distmat, _, _, query_features, gallery_features = evaluator.compute()
+    inference_seconds = perf_counter() - started
     metrics = export_results(
         output_dir,
         data_root=Path(cfg.DATASETS.ROOT_DIR),
@@ -299,6 +350,8 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
         mean_ap=mean_ap,
         dataset=cfg.DATASETS.NAMES,
         extra_columns=extra_columns,
+        frames_per_sequence=cfg.DATASETS.NUM_FRAMES,
+        inference_seconds=inference_seconds,
     )
     logger = logging.getLogger("transreid.test")
     logger.info("Validation Results")
@@ -308,6 +361,7 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
         if isinstance(rank_value, float):
             logger.info("CMC curve, Rank-%d: %.1f%%", rank, rank_value * 100)
     logger.info("完整精度指标及原始数组已保存到 %s", output_dir)
+    logger.info("推理及评测耗时：%.3f 秒", inference_seconds)
     return metrics
 
 
