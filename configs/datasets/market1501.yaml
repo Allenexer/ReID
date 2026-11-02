@@ -8,7 +8,8 @@ expected:
   query_ids: 750
   train_images: 12936
   train_ids: 751
+  gallery_images: 15913
 notes: |
-  Official split. Place the dataset at data/raw/market1501/ with
+  Official split. Place the dataset at data/raw/Market-1501-v15.09.15/ with
   bounding_box_train/, query/ and bounding_box_test/.
-  The parser also accepts data/raw/Market-1501-v15.09.15/.
+  A's parser also accepts data/raw/market1501/; C's current entry requires the official name.
