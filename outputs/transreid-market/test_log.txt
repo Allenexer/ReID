@@ -1,0 +1,88 @@
+2026-11-03 08:23:31,739 transreid INFO: Running with config:
+DATALOADER:
+  NUM_INSTANCE: 16
+  NUM_WORKERS: 0
+  SAMPLER: softmax
+DATASETS:
+  MANIFEST: /content/ReID/data/processed/manifests/market1501.json
+  NAMES: market1501
+  ROOT_DIR: /content/ReID/data/raw
+INPUT:
+  PADDING: 10
+  PIXEL_MEAN: [0.5, 0.5, 0.5]
+  PIXEL_STD: [0.5, 0.5, 0.5]
+  PROB: 0.5
+  RE_PROB: 0.5
+  SIZE_TEST: [256, 128]
+  SIZE_TRAIN: [256, 128]
+MODEL:
+  ATT_DROP_RATE: 0.0
+  COS_LAYER: False
+  DEVICE: cuda
+  DEVICE_ID: 0
+  DEVIDE_LENGTH: 4
+  DIST_TRAIN: False
+  DROP_OUT: 0.0
+  DROP_PATH: 0.1
+  ID_LOSS_TYPE: softmax
+  ID_LOSS_WEIGHT: 1.0
+  IF_LABELSMOOTH: on
+  IF_WITH_CENTER: no
+  JPM: False
+  LAST_STRIDE: 1
+  METRIC_LOSS_TYPE: triplet
+  NAME: transformer
+  NECK: bnneck
+  NO_MARGIN: False
+  PRETRAIN_CHOICE: none
+  PRETRAIN_PATH: 
+  RE_ARRANGE: True
+  SHIFT_NUM: 5
+  SHUFFLE_GROUP: 2
+  SIE_CAMERA: False
+  SIE_COE: 3.0
+  SIE_VIEW: False
+  STRIDE_SIZE: [16, 16]
+  TRANSFORMER_TYPE: vit_base_patch16_224_TransReID
+  TRIPLET_LOSS_WEIGHT: 1.0
+OUTPUT_DIR: /content/ReID/outputs/transreid-market
+SOLVER:
+  BASE_LR: 0.0003
+  BIAS_LR_FACTOR: 1
+  CENTER_LOSS_WEIGHT: 0.0005
+  CENTER_LR: 0.5
+  CHECKPOINT_PERIOD: 10
+  COSINE_MARGIN: 0.5
+  COSINE_SCALE: 30
+  EVAL_PERIOD: 10
+  GAMMA: 0.1
+  IMS_PER_BATCH: 64
+  LARGE_FC_LR: False
+  LOG_PERIOD: 100
+  MARGIN: 0.3
+  MAX_EPOCHS: 100
+  MOMENTUM: 0.9
+  OPTIMIZER_NAME: Adam
+  SEED: 1234
+  STEPS: (40, 70)
+  WARMUP_EPOCHS: 5
+  WARMUP_FACTOR: 0.01
+  WARMUP_METHOD: linear
+  WEIGHT_DECAY: 0.0005
+  WEIGHT_DECAY_BIAS: 0.0005
+TEST:
+  DIST_MAT: dist_mat.npy
+  EVAL: True
+  FEAT_NORM: yes
+  IMS_PER_BATCH: 8
+  NECK_FEAT: before
+  RE_RANKING: False
+  WEIGHT: /content/ReID/checkpoints/transreid_market_vit_base.pth
+2026-11-03 08:23:39,525 transreid INFO: query=3368, gallery=15913
+2026-11-03 08:26:47,756 transreid INFO: Validation Results
+2026-11-03 08:26:47,756 transreid INFO: mAP: 87.2%
+2026-11-03 08:26:47,756 transreid INFO: CMC curve, Rank-1: 94.7%
+2026-11-03 08:26:47,756 transreid INFO: CMC curve, Rank-5: 98.2%
+2026-11-03 08:26:47,756 transreid INFO: CMC curve, Rank-10: 99.2%
+2026-11-03 08:26:47,756 transreid INFO: 完整精度指标及原始数组已保存到 /content/ReID/outputs/transreid-market
+2026-11-03 08:26:47,757 transreid INFO: 推理及评测耗时：178.865 秒

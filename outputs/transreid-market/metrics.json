@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "model": "transreid",
+  "dataset": "market1501",
+  "evaluation_source": "transreid_upstream",
+  "protocol": "market1501",
+  "distance_metric": "squared_euclidean",
+  "feature_normalization": "l2",
+  "re_ranking": false,
+  "metric_scale": "0-1",
+  "num_query": 3368,
+  "num_gallery": 15913,
+  "mAP": 0.8718096277873302,
+  "rank1": 0.9468527436256409,
+  "rank5": 0.9824821949005127,
+  "rank10": 0.9919833540916443,
+  "inference_seconds": 178.86546289000034
+}

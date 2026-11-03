@@ -1,0 +1,11 @@
+Repository: /content/ReID
+git rev-parse HEAD (exit 0):
+b265d67afd60b62ed3c635010d4932c8143778a2
+git status --short (exit 0):
+
+Repository: /content/ReID/third_party/TransReID
+git rev-parse HEAD (exit 0):
+dec55046fcdfadee14e2c28e2df89305d8f7557a
+git status --short (exit 0):
+M datasets/make_dataloader.py
+ M model/backbones/vit_pytorch.py
