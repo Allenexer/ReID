@@ -10,7 +10,10 @@
   同名 `.validation.json`；`--verify-images` 全量解码，已有目标拒绝覆盖。
 - `evaluate.py` — A 的基线归档评测，仅接收 `status=success` 的同次归档，
   选择 native 或从特征重算 cosine；写入新目录，保留原指标和数组。
-- `log_to_metrics.py` — 占位；上游日志转 `metrics.json`（B）。
+- `run_transreid.py` — B 的 TransReID Market1501 入口；保存完整特征、距离矩阵、
+  清单、配置、环境和 git 版本。
+- `log_to_metrics.py` — 将已有 TransReID/CLIP-ReID `test_log.txt` 转成指标 JSON；
+  完整归档优先使用 `run_transreid.py`。
 统一实验入口由 D 接入。Move 标准表可登记，正式相机过滤协议待课程确认。
 
 在 `ReID/` 执行，路径参数均相对当前调用目录：
@@ -26,6 +29,8 @@ conda run -n rl_v2 python scripts/check_dataset.py --dataset move \
 conda run -n rl_v2 python scripts/evaluate.py --run-dir outputs/<run> \
   --protocol ccvid_cc --distance cosine \
   --output-dir outputs/<run>/evaluation/ccvid_cc/cosine
+conda run -n rl_v2 python scripts/run_transreid.py \
+  --manifest data/processed/manifests/market1501.json
 ```
 
 协议可选 `market1501,ccvid_general,ccvid_cc,ccvid_sc`。

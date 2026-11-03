@@ -33,18 +33,18 @@ bash scripts/setup_third_party.sh
 
 ## 3. TransReID
 
-配置文件：`third_party/TransReID/configs/Market/vit_base.yml`（普通 ViT baseline）。
+配置文件：`configs/transreid/market1501.yml`（项目入口配置，基于上游普通 ViT baseline）。
 需要覆盖的项：
 
 | 配置 | 值 | 原因 |
 |---|---|---|
-| `DATASETS.ROOT_DIR` | `../../data/raw` | 上游在它下面找 `market1501/` |
-| `MODEL.DEVICE_ID` | `('0')` | 默认 `('7')` 本机不存在 |
+| `DATASETS.ROOT_DIR` | `data/raw` | 项目入口使用项目根目录相对路径 |
+| `MODEL.DEVICE_ID` | `'0'` | 默认 `'7'` 本机不存在 |
 | `MODEL.PRETRAIN_CHOICE` | `'none'` | 推理时跳过 ImageNet 预训练；否则会去找配置里写死的 `/home/heshuting/...` 路径 |
 | `TEST.IMS_PER_BATCH` | 先 `8`，再试 `16` | 默认 256，4GB 显存会 OOM |
 | `DATALOADER.NUM_WORKERS` | `0` | Windows 多进程容易卡住 |
-| `TEST.WEIGHT` | `../../checkpoints/transreid_market_vit_base.pth` | 必填 |
-| `OUTPUT_DIR` | `../../outputs/<run>` | 日志目录 |
+| `TEST.WEIGHT` | `checkpoints/transreid_market_vit_base.pth` | 必填 |
+| `OUTPUT_DIR` | `outputs/<run>` | 日志目录 |
 
 **权重**：打开 TransReID README 的 “Trained Models and logs (Size 256)”，
 选 **Baseline(ViT)** 行的 **Market** 列（Google Drive）：
@@ -54,29 +54,34 @@ bash scripts/setup_third_party.sh
 如果想复现论文里的 TransReID 完整版（89.0 / 95.1），改用
 `configs/Market/vit_transreid.yml` + 同表 **TransReID (ViT)** 行 Market 列的权重。
 
-命令模板（**先 `cd third_party/TransReID`**，路径都相对于这个目录）：
+项目入口（在 `ReID/` 根目录运行）：
 
 ```bash
-python test.py \
-  --config_file configs/Market/vit_base.yml \
-  DATASETS.ROOT_DIR "../../data/raw" \
-  MODEL.DEVICE_ID "('0')" \
-  MODEL.PRETRAIN_CHOICE "'none'" \
-  TEST.IMS_PER_BATCH 8 \
-  DATALOADER.NUM_WORKERS 0 \
-  TEST.WEIGHT "../../checkpoints/transreid_market_vit_base.pth" \
-  OUTPUT_DIR "../../outputs/20261027-transreid-market"
+python scripts/run_transreid.py \
+  --config configs/transreid/market1501.yml \
+  --manifest data/processed/manifests/market1501.json \
+  --batch-size 8 \
+  --output-dir outputs/20261102-transreid-market
 ```
 
-注意 `MODEL.PRETRAIN_CHOICE "'none'"` 的引号：外层双引号是 shell 的，内层单引号是
-yacs 的，表示字符串 `none`。跑通后再把 batch 加到 16。
+入口会复用 A 的 Market1501 清单顺序，并保存 TransReID 的真实特征和距离矩阵；
+TransReID 归档固定使用 `viewid=1`、L2 特征、平方欧氏距离且不启用重排序。
+先用 batch 8 验证，显存充足再改为 16。
 
 上游把日志写到 `OUTPUT_DIR/test_log.txt`（注意不是 `test.log`），里面会有
 `mAP:`、`Rank-1/5/10`。保留原日志；统一评测与报告使用同次归档的完整精度数组和指标，
 不从四舍五入的日志恢复精度。
 
-`scripts/log_to_metrics.py` 的命令行由 B 设计；B 实现后在此补充实际命令。实现前
-保留原始 `test_log.txt`，不要把日志里的数字手工填进报告。
+已有日志可以单独解析，但不能替代完整归档：
+
+```bash
+python scripts/log_to_metrics.py \
+  --log outputs/<run>/test_log.txt \
+  --output outputs/<run>/parsed_metrics.json \
+  --num-query 3368 --num-gallery 15913
+```
+
+不要把日志里的数字手工填进报告；完整报告结果必须来自归档或统一评测结果。
 
 ## 4. CLIP-ReID
 

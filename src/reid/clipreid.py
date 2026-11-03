@@ -312,7 +312,7 @@ def infer(cfg: CfgNode, output_dir: Path) -> dict[str, object]:
             ]
             actual = [
                 (name, int(pid), int(camid), int(viewid))
-                for name, pid, camid, viewid in zip(names, pids, camids, view_labels, strict=True)
+                for name, pid, camid, viewid in zip(names, pids, camids, view_labels)
             ]
             if actual != expected:
                 raise ValueError("实际推理顺序与样本清单不一致")

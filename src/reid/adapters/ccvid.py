@@ -60,7 +60,7 @@ def mean_pool_features(features: np.ndarray, counts: list[int]) -> np.ndarray:
     return np.stack(
         [
             features[start:end].mean(axis=0)
-            for start, end in zip(offsets[:-1], offsets[1:], strict=True)
+                for start, end in zip(offsets[:-1], offsets[1:])
         ]
     )
 
